@@ -1,23 +1,18 @@
 function drawAircraft(uu,P)
-
-    % process inputs to function
-    pn       = uu(1);  % inertial North position     
-    pe       = uu(2);  % inertial East position
-    pd       = uu(3);
-    u        = uu(4);
-    v        = uu(5);
-    w        = uu(6);
-    phi      = uu(7);  % roll angle
-    theta    = uu(8);  % pitch angle
-    psi      = uu(9);  % yaw angle
-    p        = uu(10); % roll rate
-    q        = uu(11); % pitch rate
-    r        = uu(12); % yaw rate
-    x_c      = uu(13); % x command
+    % position in the inertial frame
+    p       = uu(1:3);
+    % velocity in the inertial frame
+    v       = uu(4:6);
+    % orientation of body {b1,b2,b3} wrt inertial frame {e1,e2,e3}
+    R       = reshape(uu(7:15), 3, 3);
+    % angular velocities in the body-fixed frame
+    Omega   = uu(16:18);
+    
+    x_c      = uu(19); % x command
 %     y_c      = uu(14); % y command
 %     z_c      = uu(15); % z command
 %     yaw_c    = 0;      % yaw command
-    t        = uu(14); % time
+    t        = uu(20); % time
     
     % define persistent variables 
     persistent spacecraft_handle;
@@ -38,19 +33,14 @@ function drawAircraft(uu,P)
         figure(1), clf;
         grid on;
         hold on;
-        spacecraft_handle = drawSpacecraftBody(V,F,patchcolors,...
-                                               pn,pe,pd,phi,theta,psi,...
-                                               []);
+        spacecraft_handle = drawSpacecraftBody(V,F,patchcolors,p,R,[]);
 %         commanded_position_handle = drawCommandedPosition(x_c,y_c,z_c,yaw_c,...
 %                                                []);
         xlabel('East')
         ylabel('North')
         zlabel('-Down')
         view(32,47)  % set the view angle for figure
-        center = [pe;pn;pd];
-        %axis([center(1)-view_range,center(1)+view_range,
-        %      center(2)-view_range,center(2)+view_range,
-        %      center(3)-view_range,center(3)+view_range]);
+        center = [p(1) p(2) -p(3)];
         axis([center(1)-view_range,center(1)+view_range, ...
               center(2)-view_range,center(2)+view_range, ...
               center(3)-view_range,center(3)+view_range]);
@@ -60,7 +50,7 @@ function drawAircraft(uu,P)
     else
         
         %figure(1);
-        pos = [pe;pn;-pd];
+        pos = [p(1) p(2) -p(3)];
         close_enough_tolerance*[view_range;view_range;view_range] - abs(pos - center);
         if (min(close_enough_tolerance*[view_range;view_range;view_range] - abs(pos-center)) < 0)
             center = pos;
@@ -69,9 +59,7 @@ function drawAircraft(uu,P)
         axis([center(1)-view_range,center(1)+view_range, ...
               center(2)-view_range,center(2)+view_range, ...
               center(3)-view_range,center(3)+view_range]);
-        drawSpacecraftBody(V,F,patchcolors,...
-                           pn,pe,pd,phi,theta,psi,...
-                           spacecraft_handle);
+        drawSpacecraftBody(V,F,patchcolors,p,R,spacecraft_handle);
 %         drawCommandedPosition(x_c,y_c,z_c,yaw_c,...
 %                            commanded_position_handle);
     end
@@ -83,18 +71,17 @@ end
 % return handle if 3rd argument is empty, otherwise use 3rd arg as handle
 %=======================================================================
 %
-function handle = drawSpacecraftBody(V,F,patchcolors,...
-                                     pn,pe,pd,phi,theta,psi,...
-                                     handle)
-  V = rotate(V', phi, theta, psi)';  % rotate spacecraft
-  V = translate(V', pn, pe, pd)';  % translate spacecraft
+function handle = drawSpacecraftBody(V,F,patchcolors,p,R,handle)
+%   V = rotate(V', phi, theta, psi)';  % rotate spacecraft
+  V = R*V';
+  V = translate(V, p(1), p(2), p(3))';  % translate spacecraft
   % transform vertices from NED to XYZ (for matlab rendering)
-  R = [...
+  RR = [...
       0, 1, 0;...
       1, 0, 0;...
       0, 0, -1;...
       ];
-  V = V*R;
+  V = V*RR;
   
   if isempty(handle)
   handle = patch('Vertices', V, 'Faces', F,...

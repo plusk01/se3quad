@@ -11,29 +11,19 @@ P.g = 9.81;     % gravity
 
 % physical parameters of airframe
 P.gravity = 9.81;
-P.mass    = 3.81;
-P.Jxx     = 0.060224;
-P.Jyy     = 0.122198;
-P.Jzz     = 0.132166;
+P.mass    = 4.34;   % [kg]
+P.Jxx     = 0.0820; % [kg-m2]
+P.Jyy     = 0.0845; % [kg-m2]
+P.Jzz     = 0.1377; % [kg-m2]
 
-P.L  = 0.25;
-P.k1 = 1; %2.98*10e-6;
-P.k2 = 1; %2.98*10e-6;
-P.mu = 1;
+% The dist from CoM to the center of ea. rotor in the b1-b2 plane
+P.d  = 0.315; % [m]
 
 % first cut at initial conditions
-P.pn0    = 0;  % initial North position
-P.pe0    = 0;  % initial East position
-P.pd0    = 0;  % initial Down position (negative altitude)
-P.u0     = 0;  % initial velocity along body x-axis
-P.v0     = 0;  % initial velocity along body y-axis
-P.w0     = 0;  % initial velocity along body z-axis
-P.phi0   = 0;  % initial roll angle
-P.theta0 = 0;  % initial pitch angle
-P.psi0   = 0;  % initial yaw angle
-P.p0     = 0;  % initial body frame roll rate
-P.q0     = 0;  % initial body frame pitch rate
-P.r0     = 0;  % initial body frame yaw rate
+P.p0 = [0 0 0];
+P.v0 = [0 0 -0.2];
+P.R0 = expm(skew(deg2rad([0 0 0])));
+P.Omega0 = deg2rad([0 0 0]);
 
 % sketch parameters
 P.nRotors = 4;

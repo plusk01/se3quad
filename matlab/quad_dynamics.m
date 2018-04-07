@@ -66,9 +66,9 @@ function [sys,x0,str,ts,simStateCompliance]=mdlInitializeSizes(P)
 %
 sizes = simsizes;
 
-sizes.NumContStates  = 12;
+sizes.NumContStates  = 18;
 sizes.NumDiscStates  = 0;
-sizes.NumOutputs     = 12;
+sizes.NumOutputs     = 18;
 sizes.NumInputs      = 4;
 sizes.DirFeedthrough = 0;
 sizes.NumSampleTimes = 1;   % at least one sample time is needed
@@ -78,7 +78,7 @@ sys = simsizes(sizes);
 %
 % initialize the initial conditions
 %
-x0  = [P.pn0; P.pe0; P.pd0; P.u0; P.v0; P.w0; P.phi0; P.theta0; P.psi0; P.p0; P.q0; P.r0];
+x0  = [P.p0 P.v0 P.R0(:)' P.Omega0];
 
 %
 % str is always an empty matrix
@@ -108,73 +108,48 @@ simStateCompliance = 'UnknownSimState';
 
 % Double Checked March 4
 function sys=mdlDerivatives(t,x,uu,P)
+% Quadrotor equations of motion taken from
+% Lee et al, Control of Complex Maneuvers for a Quadrotor UAV using
+% Geometric Methods on SE(3), 2011.
 
-    pn      = x(1);
-    pe      = x(2);
-    pd      = x(3);
-    u       = x(4);
-    v       = x(5);
-    w       = x(6);
-    phi     = x(7);
-    theta   = x(8);
-    psi     = x(9);
-    p       = x(10);
-    q       = x(11);
-    r       = x(12);
-    F       = uu(1);
-    T_phi   = uu(2);
-    T_theta = uu(3);
-    T_psi   = uu(4);
+    % position in the inertial frame
+    p       = x(1:3);
+    % velocity in the inertial frame
+    v       = x(4:6);
+    % orientation of body {b1,b2,b3} wrt inertial frame {e1,e2,e3}
+    R       = reshape(x(7:15), 3, 3);
+    % angular velocities in the body-fixed frame
+    Omega   = x(16:18);
+    
+    f       = uu(1);
+    M       = uu(2:4);
     
     % state derivative vector
-    x_dot = zeros(12,1);
+    xdot = zeros(size(x));
     
-    % calculate sines and cosines once for convenience and efficiency
-    cp = cos(phi);
-    sp = sin(phi);
-    ct = cos(theta);
-    st = sin(theta);
-    tt = tan(theta);
-    cs = cos(psi);
-    ss = sin(psi);
-    
-     % translational kinematics model
-    tkm = [ct*cs sp*st*cs-cp*ss cp*st*cs+sp*ss; 
-           ct*ss sp*st*ss+cp*cs cp*st*ss-sp*cs;
-           -st   sp*ct          cp*ct];
+    % inertia matrix
+    J = diag([P.Jxx P.Jyy P.Jzz]);
        
-    x_dot(1:3) = tkm*[u; v; w];
+    % Third axis of inertial frame
+    e3 = [0;0;1];
     
-    % translational dynamics model
-    tdm1 = [r*v-q*w; 
-            p*w-r*u; 
-            q*u-p*v];
-       
-    tdm2 = [-P.gravity*st; 
-             P.gravity*ct*sp; 
-             P.gravity*ct*cp];
-       
-    x_dot(4:6) = tdm1 + tdm2 + (1/P.mass)*[-P.mu*u; -P.mu*v; -F];
-    
-    % rotational kinematic model
-    rkm = [1 sp*tt cp*tt;
-           0 cp    -sp;
-           0 sp/ct cp/ct];
-       
-    x_dot(7:9) = rkm*[p; q; r];
-    
-    % rotational dynamics model
-    rdm1 = [(P.Jyy-P.Jzz)/P.Jxx*q*r;
-            (P.Jzz-P.Jxx)/P.Jyy*p*r;
-            (P.Jxx-P.Jyy)/P.Jzz*p*q];
         
-    rdm2 = [1/P.Jxx 0       0;
-            0       1/P.Jyy 0;
-            0       0       1/P.Jzz];
-        
-    x_dot(10:12) = rdm1 + rdm2*[T_phi; T_theta; T_psi];
-
-sys = x_dot;
+    % eq 2
+    xdot(1:3) = v;
+    
+    % eq 3
+    xdot(4:6) = P.gravity*e3 - (1/P.mass)*f*R*e3;
+    
+    % eq 4
+    Rdot = R*skew(Omega);
+    xdot(7:15) = Rdot(:);
+    
+    % eq 5
+    xdot(16:18) = J\(M - cross(Omega,J*Omega));
+    
+    
+    % output
+    sys = xdot;
 % end mdlDerivatives
 
 %
