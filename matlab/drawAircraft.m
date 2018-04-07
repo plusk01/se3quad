@@ -1,18 +1,17 @@
 function drawAircraft(uu,P)
     % position in the inertial frame
-    p       = uu(1:3);
+    x       = uu(1:3);
     % velocity in the inertial frame
     v       = uu(4:6);
     % orientation of body {b1,b2,b3} wrt inertial frame {e1,e2,e3}
     R       = reshape(uu(7:15), 3, 3);
     % angular velocities in the body-fixed frame
     Omega   = uu(16:18);
-    
-    x_c      = uu(19); % x command
-%     y_c      = uu(14); % y command
-%     z_c      = uu(15); % z command
-%     yaw_c    = 0;      % yaw command
-    t        = uu(20); % time
+    % desired states
+    xd      = uu(19:21);
+    vd      = uu(22:24);
+    % time
+    t       = uu(end);
     
     % define persistent variables 
     persistent spacecraft_handle;
@@ -33,14 +32,14 @@ function drawAircraft(uu,P)
         figure(1), clf;
         grid on;
         hold on;
-        spacecraft_handle = drawSpacecraftBody(V,F,patchcolors,p,R,[]);
+        spacecraft_handle = drawSpacecraftBody(V,F,patchcolors,x,R,[]);
 %         commanded_position_handle = drawCommandedPosition(x_c,y_c,z_c,yaw_c,...
 %                                                []);
         xlabel('East')
         ylabel('North')
         zlabel('-Down')
         view(32,47)  % set the view angle for figure
-        center = [p(1) p(2) -p(3)];
+        center = [x(1) x(2) -x(3)];
         axis([center(1)-view_range,center(1)+view_range, ...
               center(2)-view_range,center(2)+view_range, ...
               center(3)-view_range,center(3)+view_range]);
@@ -48,18 +47,16 @@ function drawAircraft(uu,P)
         
     % at every other time step, redraw base and rod
     else
-        
-        %figure(1);
-        pos = [p(1) p(2) -p(3)];
+        pos = [x(1) x(2) -x(3)];
         close_enough_tolerance*[view_range;view_range;view_range] - abs(pos - center);
         if (min(close_enough_tolerance*[view_range;view_range;view_range] - abs(pos-center)) < 0)
             center = pos;
-        end
-        
-        axis([center(1)-view_range,center(1)+view_range, ...
+            axis([center(1)-view_range,center(1)+view_range, ...
               center(2)-view_range,center(2)+view_range, ...
               center(3)-view_range,center(3)+view_range]);
-        drawSpacecraftBody(V,F,patchcolors,p,R,spacecraft_handle);
+        end
+        
+        drawSpacecraftBody(V,F,patchcolors,x,R,spacecraft_handle);
 %         drawCommandedPosition(x_c,y_c,z_c,yaw_c,...
 %                            commanded_position_handle);
     end

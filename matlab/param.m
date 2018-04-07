@@ -1,16 +1,10 @@
-clear; clc; close all;
+clear; clc;
 
+% Sample time of the controller
 P.Ts = 0.01;
 
-P.takeoff_time = 5;
-P.height = -20; %-1.5;     % desired height
-P.one_lap = 10;   % expected time for one lap
-P.omega = 2*pi/P.one_lap;
-P.radius = 5;
-P.g = 9.81;     % gravity
-
 % physical parameters of airframe
-P.gravity = 9.81;
+P.gravity = 9.81;   % [m/s/s]
 P.mass    = 4.34;   % [kg]
 P.Jxx     = 0.0820; % [kg-m2]
 P.Jyy     = 0.0845; % [kg-m2]
@@ -21,12 +15,18 @@ P.d  = 0.315; % [m]
 
 % first cut at initial conditions
 P.p0 = [0 0 0];
-P.v0 = [0 0 -0.2];
-P.R0 = expm(skew(deg2rad([0 0 0])));
+P.v0 = [0 0 0];
+P.R0 = expm(hat(deg2rad([0 0 0])));
 P.Omega0 = deg2rad([0 0 0]);
 
 % sketch parameters
 P.nRotors = 4;
 
 % time constant for dirty derivative filter
-P.tau = 0.15;
+P.tau = 2; % use simple instead of dirty-derivative (0.05);
+
+% Control gains (taken from Lee2011, arXiv:1003.2005v4)
+P.kx = 16*P.mass;
+P.kv = 5.6*P.mass;
+P.kR = 8.81;
+P.kOmega = 2.54;
