@@ -1,0 +1,6 @@
+*.m~
+*.bak
+*.~
+*.pyc
+*.autosave
+*.mat
