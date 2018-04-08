@@ -1,10 +1,10 @@
 clc, clear;
 
 % dirty-derivative time constant
-tau = 0.025;
+tau = 0.0025;
 
 % to use a simple finite difference, use tau = 0 (see algorithm)
-tau = 0;
+% tau = 0;
 
 Ts = 0.005;
 t = 0:Ts:(2-Ts);
@@ -26,14 +26,15 @@ zddot = [0 diff(zdot(1,:))]./[0 diff(t)];
 
 % ======== Numerically Calculate Derivative (tustin) ======================
 
+dxdt  = DirtyDerivative(1, tau, Ts);
+dx2dt = DirtyDerivative(2, tau, Ts);
+
 Xdot  = zeros(3,length(t));
 Xddot = zeros(3,length(t));
 
-for i = 1:length(t)
-    [xdot, xddot, ~, ~] = dxdt(x(:,i), t(i)==0, tau, Ts);
-    
-    Xdot(:,i)  = xdot;
-    Xddot(:,i) = xddot;
+for i = 1:length(t)  
+    Xdot(:,i)  = dxdt.calculate(x(:,i));
+    Xddot(:,i) = dx2dt.calculate(Xdot(:,i));
 end
 
 figure(1), clf;

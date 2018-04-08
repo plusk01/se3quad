@@ -16,17 +16,22 @@ P.d  = 0.315; % [m]
 % first cut at initial conditions
 P.p0 = [0 0 0];
 P.v0 = [0 0 0];
-P.R0 = expm(hat(deg2rad([0 0 0])));
+P.R0 = expm(hat(deg2rad([178 0 0])));
 P.Omega0 = deg2rad([0 0 0]);
 
 % sketch parameters
 P.nRotors = 4;
 
 % time constant for dirty derivative filter
-P.tau = 2; % use simple instead of dirty-derivative (0.05);
+P.tau = 0.005; % use simple instead of dirty-derivative (0.05);
 
 % Control gains (taken from Lee2011, arXiv:1003.2005v4)
 P.kx = 16*P.mass;
 P.kv = 5.6*P.mass;
 P.kR = 8.81;
 P.kOmega = 2.54;
+
+% P.kx = 1*P.mass;
+% P.kv = 1*P.mass;
+% P.kR = 8.81;
+% P.kOmega = 2.54;
