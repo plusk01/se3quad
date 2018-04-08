@@ -114,8 +114,11 @@ eOmega = Omega - R.'*Rc*Omegac;
 % moment vector control
 M = -P.kR*eR - P.kOmega*eOmega + cross(Omega, J*Omega) ...
   - J*(hat(Omega)*R.'*Rc*Omegac - R.'*Rc*Omegac_1dot);
-% M = [0;0;0];
 
-out = [f;M;xd;xd_1dot];
+% calculate SO(3) error function, Psi
+Psi = (1/2)*trace(eye(3) - Rc.'*R);
 
+deltaF = P.Mix*[f;M];
+
+out = [f;M;xd;xd_1dot;Omegac;Psi;deltaF];
 end
