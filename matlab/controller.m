@@ -83,6 +83,7 @@ A_1dot   = -P.kx*ev - P.kv*ea + P.mass*xd_3dot;
 b3c_1dot = -A_1dot/norm(A) + (dot(A,A_1dot)/norm(A)^3)*A;
 C_1dot   = cross(b3c_1dot, b1d) + cross(b3c, b1d_1dot);
 b2c_1dot = C/norm(C) - (dot(C,C_1dot)/norm(C)^3)*C;
+% b2c_1dot = -1*b2c_1dot;
 b1c_1dot = cross(b2c_1dot, b3c) + cross(b2c, b3c_1dot);
 
 % second time derivatives of body axes
@@ -95,6 +96,7 @@ C_2dot   = cross(b3c_2dot, b1d) + cross(b3c, b1d_2dot)          ...
 b2c_2dot = C_2dot/norm(C) - (2/norm(C)^3)*dot(C,C_1dot)*C_1dot  ...
          - ((norm(C_2dot)^2 + dot(C,C_2dot))/norm(C)^3)*C       ...
          + (3/norm(C)^5)*(dot(C,C_1dot)^2)*C;
+% b2c_2dot = -1*b2c_2dot;
 b1c_2dot = cross(b2c_2dot, b3c) + cross(b2c, b3c_2dot)          ...
          + 2*cross(b2c_1dot, b3c_1dot);
 

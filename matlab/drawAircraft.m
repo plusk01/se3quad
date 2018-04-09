@@ -20,7 +20,7 @@ function drawAircraft(uu,P)
     persistent V;
     persistent F;
     persistent patchcolors;
-    view_range = 10;
+    view_range = 6;
     close_enough_tolerance = 0.9;
     
     % first time function is called, initialize plot and persistent vars
@@ -43,6 +43,7 @@ function drawAircraft(uu,P)
         axis([center(1)-view_range,center(1)+view_range, ...
               center(2)-view_range,center(2)+view_range, ...
               center(3)-view_range,center(3)+view_range]);
+          axis square
         hold on;
         
     % at every other time step, redraw base and rod

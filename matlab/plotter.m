@@ -149,7 +149,7 @@ end
 function handle = updatestate(t, x, handle, style)
 if isempty(handle)
     if nargin<4, style = '-'; end
-	handle = plot(t, x, style);
+	handle = plot(t, x, style, 'LineWidth', 2);
 else
     XX = get(handle,'XData'); YY = get(handle,'YData');
     set(handle,'XData',[XX t],'YData',[YY x]);

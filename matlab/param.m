@@ -3,6 +3,9 @@ clear; clc;
 % Sample time of the controller
 P.Ts = 0.01;
 
+% Sample time of the state plotter
+P.plotTs = 0.1;
+
 % physical parameters of airframe
 P.gravity = 9.81;   % [m/s/s]
 P.mass    = 4.34;   % [kg]
@@ -23,7 +26,7 @@ P.Mix = inv([1 1 1 1; 0 -P.d 0 P.d;...
 % first cut at initial conditions
 P.p0 = [0 0 0];
 P.v0 = [0 0 0];
-P.R0 = expm(hat(deg2rad([178 0 0])));
+P.R0 = expm(hat(deg2rad([178.2 0 0])));
 P.Omega0 = deg2rad([0 0 0]);
 
 % sketch parameters
