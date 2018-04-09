@@ -141,7 +141,7 @@ function sys=mdlDerivatives(t,x,uu,P)
     xdot(4:6) = P.gravity*e3 - (1/P.mass)*f*R*e3;
     
     % eq 4
-    Rdot = R*skew(Omega);
+    Rdot = R*hat(Omega);
     xdot(7:15) = Rdot(:);
     
     % eq 5
